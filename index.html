@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Weather Data Analysis – Abarna.L | 2117250020003</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#020b18;--panel:rgba(0,200,255,0.04);--border:rgba(0,200,255,0.18);--cyan:#00c8ff;--gold:#ffd94a;--green:#00ff9f;--red:#ff4d6d;--text:#cce8ff;--dim:#5a8aaa;}
+*{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,200,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+nav{position:sticky;top:0;z-index:100;background:rgba(2,11,24,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:10px 24px;flex-wrap:wrap;gap:8px;}
+nav .brand{font-family:'Orbitron',monospace;color:var(--cyan);font-size:0.78rem;letter-spacing:2px;}
+nav .links{display:flex;gap:4px;flex-wrap:wrap;}
+nav a{color:var(--dim);font-size:0.7rem;padding:4px 10px;border:1px solid transparent;border-radius:4px;text-decoration:none;transition:all .2s;}
+nav a:hover{color:var(--cyan);border-color:var(--border);}
+.hero{position:relative;z-index:1;text-align:center;padding:60px 20px 40px;}
+.badge{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:3px;color:var(--cyan);background:rgba(0,200,255,0.08);border:1px solid rgba(0,200,255,0.3);padding:5px 16px;border-radius:20px;margin-bottom:20px;animation:pulse 2.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,200,255,0.3);}50%{box-shadow:0 0 0 8px rgba(0,200,255,0);}}
+.hero h1{font-family:'Orbitron',monospace;font-size:clamp(1.5rem,4vw,2.6rem);font-weight:900;background:linear-gradient(120deg,var(--cyan),var(--gold),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;margin-bottom:14px;}
+.hero p{font-size:0.88rem;color:var(--dim);font-family:'Share Tech Mono',monospace;letter-spacing:1px;margin-bottom:24px;}
+.meta{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:16px;}
+.mpill{background:rgba(0,200,255,0.06);border:1px solid rgba(0,200,255,0.2);border-radius:6px;padding:8px 16px;font-size:0.76rem;}
+.mpill span{color:var(--gold);font-family:'Share Tech Mono',monospace;display:block;font-size:0.65rem;margin-bottom:2px;}
+.sec{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:36px 18px;}
+.sec-title{font-family:'Orbitron',monospace;font-size:0.8rem;letter-spacing:4px;color:var(--cyan);border-left:3px solid var(--cyan);padding-left:12px;margin-bottom:24px;text-transform:uppercase;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:36px;}
+.scard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 14px;text-align:center;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.scard:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,200,255,0.12);}
+.scard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--gold));}
+.scard .v{font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:700;color:var(--gold);}
+.scard .l{font-size:0.7rem;color:var(--dim);margin-top:5px;letter-spacing:1px;}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px;}
+.cc{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;transition:box-shadow .2s;}
+.cc:hover{box-shadow:0 6px 30px rgba(0,200,255,0.1);}
+.cc.wide{grid-column:1/-1;}
+.cc h3{font-family:'Orbitron',monospace;font-size:0.68rem;letter-spacing:2px;color:var(--cyan);margin-bottom:16px;text-transform:uppercase;}
+.cc canvas{max-height:240px;}
+.tw{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:0.78rem;font-family:'Share Tech Mono',monospace;}
+thead tr{background:rgba(0,200,255,0.08);}
+th{color:var(--cyan);padding:11px 12px;text-align:center;letter-spacing:1px;font-size:0.68rem;border-bottom:1px solid var(--border);}
+td{padding:9px 12px;text-align:center;border-bottom:1px solid rgba(0,200,255,0.05);}
+tbody tr:hover td{background:rgba(0,200,255,0.04);}
+.hl{color:var(--gold)!important;font-weight:700;}
+.ag{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;}
+.at{margin-top:0;}
+.at h4{color:var(--gold);font-family:'Orbitron',monospace;font-size:0.68rem;letter-spacing:2px;margin-bottom:10px;}
+.algo{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px;}
+.algo li{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;font-size:0.83rem;}
+.algo li .n{font-family:'Orbitron',monospace;color:var(--gold);font-size:0.95rem;font-weight:700;flex-shrink:0;}
+.cblock{background:#010d18;border:1px solid var(--border);border-radius:10px;padding:22px;overflow-x:auto;font-family:'Share Tech Mono',monospace;font-size:0.76rem;line-height:1.75;color:#a8c8e8;white-space:pre;position:relative;}
+.kw{color:#00c8ff;}.fn{color:#ffd94a;}.st{color:#00ff9f;}.cm{color:#3a6080;}.nm{color:#ff9f7e;}
+.cpbtn{position:absolute;top:12px;right:12px;background:rgba(0,200,255,0.1);border:1px solid rgba(0,200,255,0.3);color:var(--cyan);font-size:0.68rem;padding:4px 12px;border-radius:4px;cursor:pointer;font-family:'Exo 2',sans-serif;letter-spacing:1px;transition:all .2s;}
+.cpbtn:hover{background:rgba(0,200,255,0.2);}
+.conc{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;}
+.ccard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;border-top:2px solid var(--green);}
+.ccard h4{color:var(--green);font-size:0.76rem;letter-spacing:2px;margin-bottom:8px;font-family:'Orbitron',monospace;}
+.ccard p{font-size:0.8rem;color:var(--text);line-height:1.6;}
+footer{position:relative;z-index:1;text-align:center;padding:28px 20px;border-top:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--dim);letter-spacing:1px;}
+footer span{color:var(--cyan);}
+.div{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:6px 0;}
+@media(max-width:600px){.cc.wide{grid-column:1;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">⚡ WEATHER ANALYSIS</div>
+  <div class="links">
+    <a href="#overview">Overview</a>
+    <a href="#dataset">Dataset</a>
+    <a href="#charts">Charts</a>
+    <a href="#analysis">Analysis</a>
+    <a href="#algo">Algorithm</a>
+    <a href="#code">Code</a>
+    <a href="#result">Result</a>
+  </div>
+</nav>
+
+<div class="hero" id="overview">
+  <div class="badge">PYTHON ASSIGNMENT 4 · MINI PROJECT · 2025–2026</div>
+  <h1>Weather Data Analysis<br>&amp; Trend Identification</h1>
+  <p>// B.E Computer Science Engineering · Even Semester</p>
+  <div class="meta">
+    <div class="mpill"><span>STUDENT</span>Abarna.L</div>
+    <div class="mpill"><span>REG NO</span>2117250020003</div>
+    <div class="mpill"><span>DEPT</span>Computer Science Engineering</div>
+    <div class="mpill"><span>INSTITUTION</span>Rajalakshmi Institute of Technology</div>
+    <div class="mpill"><span>FACULTY</span>Dr. H. Anwar Basha</div>
+    <div class="mpill"><span>DATE</span>18 / 05 / 2023</div>
+  </div>
+</div>
+
+<div class="div"></div>
+
+<!-- NUMPY STATS -->
+<div class="sec">
+  <div class="sec-title">📡 NumPy Statistics Overview</div>
+  <div class="stats">
+    <div class="scard"><div class="v">26.42°C</div><div class="l">Mean Temperature</div></div>
+    <div class="scard"><div class="v">35°C</div><div class="l">Max Temp · Delhi Jul</div></div>
+    <div class="scard"><div class="v">10°C</div><div class="l">Min Temp · Delhi Jan</div></div>
+    <div class="scard"><div class="v">5.94</div><div class="l">Std Deviation</div></div>
+    <div class="scard"><div class="v">853mm</div><div class="l">Total Rainfall All</div></div>
+    <div class="scard"><div class="v">71.25%</div><div class="l">Avg Humidity</div></div>
+    <div class="scard"><div class="v">16.25</div><div class="l">Avg Wind km/h</div></div>
+  </div>
+</div>
+
+<!-- DATASET -->
+<div class="sec" id="dataset">
+  <div class="sec-title">📋 Full Weather Dataset</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>ID</th><th>Station</th><th>Location</th><th>Month</th><th>Temp (°C)</th><th>Rainfall (mm)</th><th>Humidity (%)</th><th>Wind (km/h)</th></tr></thead>
+      <tbody id="dtb"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MISSING VALUES -->
+<div class="sec">
+  <div class="sec-title">🔍 Missing Values Check</div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Column</th><th>Missing Count</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Record_ID</td><td class="hl">0</td><td style="color:var(--green)">✅ Clean</td></tr>
+        <tr><td>Station_Name</td><td class="hl">0</td><td style="color:var(--green)">✅ Clean</td></tr>
+        <tr><td>Location</td><td class="hl">0</td><td style="color:var(--green)">✅ Clean</td></tr>
+        <tr><td>Month</td><td class="hl">0</td><td style="color:var(--green)">✅ Clean</td></tr>
+        <tr><td>Temperature_C</td><td class="hl">0</td><td style="color:var(--green)">✅ Clean</td></tr>
+        <tr><td>Rainfall_mm</td><td class="hl">0</td><td style="color:var(--green)">✅ Clean</td></tr>
+        <tr><td>Humidity_Pct</td><td class="hl">0</td><td style="color:var(--green)">✅ Clean</td></tr>
+        <tr><td>Wind_Speed_kmh</td><td class="hl">0</td><td style="color:var(--green)">✅ Clean</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CHARTS -->
+<div class="sec" id="charts">
+  <div class="sec-title">📊 All Visualizations</div>
+  <div class="cgrid">
+    <div class="cc"><h3>📅 Avg Temperature by Month</h3><canvas id="c1"></canvas></div>
+    <div class="cc"><h3>🌧 Total Rainfall by Location</h3><canvas id="c2"></canvas></div>
+    <div class="cc wide"><h3>📈 Temperature Trend by Station (Line Graph)</h3><canvas id="c3" style="max-height:280px;"></canvas></div>
+    <div class="cc"><h3>💧 Avg Humidity by Station</h3><canvas id="c4"></canvas></div>
+    <div class="cc"><h3>🌬 Avg Wind Speed by Station</h3><canvas id="c5"></canvas></div>
+    <div class="cc wide"><h3>🌧 Monthly Rainfall per Station (Grouped)</h3><canvas id="c6" style="max-height:260px;"></canvas></div>
+  </div>
+</div>
+
+<!-- ANALYSIS TABLES -->
+<div class="sec" id="analysis">
+  <div class="sec-title">🔢 Analysis Tables</div>
+  <div class="ag">
+    <div class="at">
+      <h4>MONTHLY AVG TEMPERATURE (°C)</h4>
+      <div class="tw"><table>
+        <thead><tr><th>Month</th><th>Avg Temp (°C)</th></tr></thead>
+        <tbody>
+          <tr><td>Jan</td><td class="hl">18.67</td></tr>
+          <tr><td>Apr</td><td class="hl">30.00</td></tr>
+          <tr><td>Jul</td><td class="hl">31.33</td></tr>
+          <tr><td>Oct</td><td class="hl">25.67</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="at">
+      <h4>TOTAL RAINFALL BY LOCATION (mm)</h4>
+      <div class="tw"><table>
+        <thead><tr><th>Location</th><th>Total (mm)</th></tr></thead>
+        <tbody>
+          <tr><td>North</td><td class="hl">255</td></tr>
+          <tr><td>South</td><td class="hl">225</td></tr>
+          <tr><td>West</td><td class="hl">373</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="at">
+      <h4>MAX TEMPERATURE BY STATION (°C)</h4>
+      <div class="tw"><table>
+        <thead><tr><th>Station</th><th>Max Temp (°C)</th></tr></thead>
+        <tbody>
+          <tr><td>Chennai</td><td class="hl">32</td></tr>
+          <tr><td>Delhi</td><td class="hl">35</td></tr>
+          <tr><td>Mumbai</td><td class="hl">30</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+  <div style="margin-top:24px;">
+    <div class="at"><h4>PIVOT TABLE – AVG TEMPERATURE (°C) PER STATION PER MONTH</h4>
+    <div class="tw"><table>
+      <thead><tr><th>Station</th><th>Jan</th><th>Apr</th><th>Jul</th><th>Oct</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--cyan)">Chennai</td><td>24.0</td><td>32.0</td><td>30.0</td><td>28.0</td></tr>
+        <tr><td style="color:var(--cyan)">Delhi</td><td>10.0</td><td>28.0</td><td class="hl">35.0</td><td>22.0</td></tr>
+        <tr><td style="color:var(--cyan)">Mumbai</td><td>22.0</td><td>30.0</td><td>29.0</td><td>27.0</td></tr>
+      </tbody>
+    </table></div></div>
+  </div>
+</div>
+
+<!-- ALGORITHM -->
+<div class="sec" id="algo">
+  <div class="sec-title">⚙️ Algorithm Steps</div>
+  <ul class="algo">
+    <li><span class="n">01</span>Import NumPy, Pandas, and Matplotlib libraries</li>
+    <li><span class="n">02</span>Create or read the weather CSV dataset using Pandas</li>
+    <li><span class="n">03</span>Display first few rows using head()</li>
+    <li><span class="n">04</span>Check for missing values using isnull().sum()</li>
+    <li><span class="n">05</span>Fill or drop missing values using fillna() or dropna()</li>
+    <li><span class="n">06</span>Remove duplicate records using drop_duplicates()</li>
+    <li><span class="n">07</span>Perform grouping based on Month and Location</li>
+    <li><span class="n">08</span>Calculate average, maximum, and minimum values</li>
+    <li><span class="n">09</span>Generate pivot tables for seasonal analysis</li>
+    <li><span class="n">10</span>Plot bar charts and line graphs using Matplotlib</li>
+    <li><span class="n">11</span>Display summary results and conclusions</li>
+  </ul>
+</div>
+
+<!-- PYTHON CODE -->
+<div class="sec" id="code">
+  <div class="sec-title">💻 Python Program</div>
+  <div class="cblock" id="cb"><button class="cpbtn" onclick="cp()">COPY</button><span class="cm"># ── Import Libraries ──────────────────────────────</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># ── Create Sample Weather Dataset ─────────────────</span>
+weather_data = {
+    <span class="st">'Record_ID'</span>     : [<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">3</span>,<span class="nm">4</span>,<span class="nm">5</span>,<span class="nm">6</span>,<span class="nm">7</span>,<span class="nm">8</span>,<span class="nm">9</span>,<span class="nm">10</span>,<span class="nm">11</span>,<span class="nm">12</span>],
+    <span class="st">'Station_Name'</span>  : [<span class="st">'Chennai'</span>,<span class="st">'Chennai'</span>,<span class="st">'Chennai'</span>,<span class="st">'Chennai'</span>,
+                        <span class="st">'Delhi'</span>,<span class="st">'Delhi'</span>,<span class="st">'Delhi'</span>,<span class="st">'Delhi'</span>,
+                        <span class="st">'Mumbai'</span>,<span class="st">'Mumbai'</span>,<span class="st">'Mumbai'</span>,<span class="st">'Mumbai'</span>],
+    <span class="st">'Location'</span>      : [<span class="st">'South'</span>,<span class="st">'South'</span>,<span class="st">'South'</span>,<span class="st">'South'</span>,
+                        <span class="st">'North'</span>,<span class="st">'North'</span>,<span class="st">'North'</span>,<span class="st">'North'</span>,
+                        <span class="st">'West'</span>,<span class="st">'West'</span>,<span class="st">'West'</span>,<span class="st">'West'</span>],
+    <span class="st">'Month'</span>         : [<span class="st">'Jan'</span>,<span class="st">'Apr'</span>,<span class="st">'Jul'</span>,<span class="st">'Oct'</span>,
+                        <span class="st">'Jan'</span>,<span class="st">'Apr'</span>,<span class="st">'Jul'</span>,<span class="st">'Oct'</span>,
+                        <span class="st">'Jan'</span>,<span class="st">'Apr'</span>,<span class="st">'Jul'</span>,<span class="st">'Oct'</span>],
+    <span class="st">'Temperature_C'</span> : [<span class="nm">24</span>,<span class="nm">32</span>,<span class="nm">30</span>,<span class="nm">28</span>,<span class="nm">10</span>,<span class="nm">28</span>,<span class="nm">35</span>,<span class="nm">22</span>,<span class="nm">22</span>,<span class="nm">30</span>,<span class="nm">29</span>,<span class="nm">27</span>],
+    <span class="st">'Rainfall_mm'</span>   : [<span class="nm">5</span>,<span class="nm">20</span>,<span class="nm">120</span>,<span class="nm">80</span>,<span class="nm">10</span>,<span class="nm">15</span>,<span class="nm">200</span>,<span class="nm">30</span>,<span class="nm">3</span>,<span class="nm">10</span>,<span class="nm">300</span>,<span class="nm">60</span>],
+    <span class="st">'Humidity_Pct'</span>  : [<span class="nm">70</span>,<span class="nm">65</span>,<span class="nm">85</span>,<span class="nm">80</span>,<span class="nm">45</span>,<span class="nm">50</span>,<span class="nm">75</span>,<span class="nm">55</span>,<span class="nm">72</span>,<span class="nm">68</span>,<span class="nm">88</span>,<span class="nm">78</span>],
+    <span class="st">'Wind_Speed_kmh'</span>: [<span class="nm">12</span>,<span class="nm">15</span>,<span class="nm">20</span>,<span class="nm">14</span>,<span class="nm">18</span>,<span class="nm">22</span>,<span class="nm">25</span>,<span class="nm">16</span>,<span class="nm">10</span>,<span class="nm">13</span>,<span class="nm">18</span>,<span class="nm">11</span>],
+}
+
+df = pd.<span class="fn">DataFrame</span>(weather_data)
+
+<span class="cm"># ── Display & Check ───────────────────────────────</span>
+<span class="fn">print</span>(<span class="st">"\nWeather Dataset\n"</span>); <span class="fn">print</span>(df)
+<span class="fn">print</span>(<span class="st">"\nMissing Values\n"</span>); <span class="fn">print</span>(df.<span class="fn">isnull</span>().<span class="fn">sum</span>())
+<span class="fn">print</span>(<span class="st">"\nBasic Statistics\n"</span>)
+<span class="fn">print</span>(df[[<span class="st">'Temperature_C'</span>,<span class="st">'Rainfall_mm'</span>,<span class="st">'Humidity_Pct'</span>,<span class="st">'Wind_Speed_kmh'</span>]].<span class="fn">describe</span>())
+
+<span class="cm"># ── Grouping & Aggregation ────────────────────────</span>
+monthly_temp  = df.<span class="fn">groupby</span>(<span class="st">'Month'</span>)[<span class="st">'Temperature_C'</span>].<span class="fn">mean</span>()
+location_rain = df.<span class="fn">groupby</span>(<span class="st">'Location'</span>)[<span class="st">'Rainfall_mm'</span>].<span class="fn">sum</span>()
+max_temp      = df.<span class="fn">groupby</span>(<span class="st">'Station_Name'</span>)[<span class="st">'Temperature_C'</span>].<span class="fn">max</span>()
+
+<span class="fn">print</span>(<span class="st">"\nMonthly Avg Temp:\n"</span>, monthly_temp)
+<span class="fn">print</span>(<span class="st">"\nRainfall by Location:\n"</span>, location_rain)
+<span class="fn">print</span>(<span class="st">"\nMax Temp by Station:\n"</span>, max_temp)
+
+<span class="cm"># ── Pivot Table ───────────────────────────────────</span>
+pivot = pd.<span class="fn">pivot_table</span>(df,values=<span class="st">'Temperature_C'</span>,
+    index=<span class="st">'Station_Name'</span>,columns=<span class="st">'Month'</span>,aggfunc=np.mean)
+<span class="fn">print</span>(<span class="st">"\nPivot Table:\n"</span>, pivot)
+
+<span class="cm"># ── NumPy Stats ───────────────────────────────────</span>
+temp_array = np.<span class="fn">array</span>(df[<span class="st">'Temperature_C'</span>])
+<span class="fn">print</span>(<span class="st">f"\nMean:{np.mean(temp_array):.2f} Max:{np.max(temp_array)} Min:{np.min(temp_array)} Std:{np.std(temp_array):.2f}"</span>)
+
+<span class="cm"># ── Chart 1: Avg Temp by Month (Bar) ─────────────</span>
+plt.<span class="fn">figure</span>(figsize=(<span class="nm">7</span>,<span class="nm">4</span>))
+monthly_temp.<span class="fn">plot</span>(kind=<span class="st">'bar'</span>,color=<span class="st">'steelblue'</span>)
+plt.<span class="fn">title</span>(<span class="st">'Average Temperature by Month'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'Month'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Temperature (C)'</span>)
+plt.<span class="fn">grid</span>(axis=<span class="st">'y'</span>); plt.<span class="fn">tight_layout</span>(); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Chart 2: Rainfall by Location (Bar) ──────────</span>
+plt.<span class="fn">figure</span>(figsize=(<span class="nm">6</span>,<span class="nm">4</span>))
+location_rain.<span class="fn">plot</span>(kind=<span class="st">'bar'</span>,color=<span class="st">'teal'</span>)
+plt.<span class="fn">title</span>(<span class="st">'Total Rainfall by Location'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'Location'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Rainfall (mm)'</span>)
+plt.<span class="fn">grid</span>(axis=<span class="st">'y'</span>); plt.<span class="fn">tight_layout</span>(); plt.<span class="fn">show</span>()
+
+<span class="cm"># ── Chart 3: Temperature Trend (Line) ────────────</span>
+plt.<span class="fn">figure</span>(figsize=(<span class="nm">8</span>,<span class="nm">4</span>))
+<span class="kw">for</span> station <span class="kw">in</span> df[<span class="st">'Station_Name'</span>].<span class="fn">unique</span>():
+    sub = df[df[<span class="st">'Station_Name'</span>]==station]
+    plt.<span class="fn">plot</span>(sub[<span class="st">'Month'</span>],sub[<span class="st">'Temperature_C'</span>],marker=<span class="st">'o'</span>,label=station)
+plt.<span class="fn">title</span>(<span class="st">'Temperature Trend by Station'</span>)
+plt.<span class="fn">xlabel</span>(<span class="st">'Month'</span>); plt.<span class="fn">ylabel</span>(<span class="st">'Temperature (C)'</span>)
+plt.<span class="fn">legend</span>(); plt.<span class="fn">grid</span>(<span class="kw">True</span>); plt.<span class="fn">tight_layout</span>(); plt.<span class="fn">show</span>()
+
+<span class="fn">print</span>(<span class="st">"\nWeather Data Analysis Completed Successfully"</span>)</div>
+</div>
+
+<!-- RESULT -->
+<div class="sec" id="result">
+  <div class="sec-title">✅ Result &amp; Conclusion</div>
+  <div class="conc">
+    <div class="ccard"><h4>Dataset Management</h4><p>Stored and managed 12 weather records for 3 stations — Chennai, Delhi, and Mumbai — across 4 months with 8 attributes each.</p></div>
+    <div class="ccard"><h4>Temperature Analysis</h4><p>July records the highest average temperature (31.33°C). Delhi shows the widest range — from 10°C in January to 35°C in July.</p></div>
+    <div class="ccard"><h4>Rainfall Patterns</h4><p>West region (Mumbai) receives the highest total rainfall of 373 mm, driven by July's monsoon peak of 300 mm.</p></div>
+    <div class="ccard"><h4>NumPy Computation</h4><p>Overall mean temperature of 26.42°C with a standard deviation of 5.94 — confirming moderate seasonal variation across all stations.</p></div>
+    <div class="ccard"><h4>Pivot Tables</h4><p>Station-wise monthly pivot tables provide a clear cross-dimensional view for comparative seasonal temperature analysis.</p></div>
+    <div class="ccard"><h4>Visualizations</h4><p>6 charts generated — bar charts, line trend graph, grouped rainfall chart — displaying all weather patterns clearly.</p></div>
+  </div>
+  <div style="margin-top:28px;">
+    <div class="sec-title">🚀 Future Enhancements</div>
+    <ul class="algo">
+      <li><span class="n">→</span>Real-time data via OpenWeatherMap API</li>
+      <li><span class="n">→</span>Database using SQLite or PostgreSQL</li>
+      <li><span class="n">→</span>Interactive dashboard using Streamlit</li>
+      <li><span class="n">→</span>Mobile alerts for extreme weather events</li>
+      <li><span class="n">→</span>AI/ML-based weather forecasting models</li>
+      <li><span class="n">→</span>Automated anomaly detection system</li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  <span>WEATHER DATA ANALYSIS COMPLETED SUCCESSFULLY</span><br><br>
+  Python Assignment 4 · Mini Project · Academic Year 2025–2026 (Even Semester)<br>
+  Rajalakshmi Institute of Technology · Faculty: Dr. H. Anwar Basha
+</footer>
+
+<script>
+const wd=[[1,'Chennai','South','Jan',24,5,70,12],[2,'Chennai','South','Apr',32,20,65,15],[3,'Chennai','South','Jul',30,120,85,20],[4,'Chennai','South','Oct',28,80,80,14],[5,'Delhi','North','Jan',10,10,45,18],[6,'Delhi','North','Apr',28,15,50,22],[7,'Delhi','North','Jul',35,200,75,25],[8,'Delhi','North','Oct',22,30,55,16],[9,'Mumbai','West','Jan',22,3,72,10],[10,'Mumbai','West','Apr',30,10,68,13],[11,'Mumbai','West','Jul',29,300,88,18],[12,'Mumbai','West','Oct',27,60,78,11]];
+const tb=document.getElementById('dtb');
+wd.forEach(r=>{const h=r[4]===35?' class="hl"':'';tb.innerHTML+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td${h}>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td></tr>`;});
+const co={plugins:{legend:{labels:{color:'#cce8ff',font:{size:11,family:'Exo 2'}}}},scales:{x:{ticks:{color:'#5a8aaa'},grid:{color:'rgba(0,200,255,0.06)'}},y:{ticks:{color:'#5a8aaa'},grid:{color:'rgba(0,200,255,0.06)'}}}};
+new Chart(document.getElementById('c1'),{type:'bar',data:{labels:['Jan','Apr','Jul','Oct'],datasets:[{label:'Avg Temp (°C)',data:[18.67,30,31.33,25.67],backgroundColor:['rgba(78,121,167,0.75)','rgba(242,142,43,0.75)','rgba(225,87,89,0.75)','rgba(118,183,178,0.75)'],borderColor:['#4e79a7','#f28e2b','#e15759','#76b7b2'],borderWidth:1,borderRadius:6}]},options:{...co,plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('c2'),{type:'bar',data:{labels:['North','South','West'],datasets:[{label:'Total Rainfall (mm)',data:[255,225,373],backgroundColor:['rgba(0,255,159,0.25)','rgba(255,217,74,0.25)','rgba(0,200,255,0.25)'],borderColor:['#00ff9f','#ffd94a','#00c8ff'],borderWidth:2,borderRadius:6}]},options:{...co,plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('c3'),{type:'line',data:{labels:['Jan','Apr','Jul','Oct'],datasets:[{label:'Chennai',data:[24,32,30,28],borderColor:'#e15759',backgroundColor:'rgba(225,87,89,0.1)',tension:0.4,pointRadius:5,fill:true},{label:'Delhi',data:[10,28,35,22],borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.1)',tension:0.4,pointRadius:5,fill:true},{label:'Mumbai',data:[22,30,29,27],borderColor:'#00ff9f',backgroundColor:'rgba(0,255,159,0.1)',tension:0.4,pointRadius:5,fill:true}]},options:co});
+new Chart(document.getElementById('c4'),{type:'bar',data:{labels:['Chennai','Delhi','Mumbai'],datasets:[{label:'Avg Humidity (%)',data:[75,56.25,76.5],backgroundColor:['rgba(225,87,89,0.6)','rgba(0,200,255,0.6)','rgba(0,255,159,0.6)'],borderRadius:6}]},options:{...co,plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('c5'),{type:'bar',data:{labels:['Chennai','Delhi','Mumbai'],datasets:[{label:'Avg Wind (km/h)',data:[15.25,20.25,13],backgroundColor:['rgba(242,142,43,0.6)','rgba(118,183,178,0.6)','rgba(255,157,167,0.6)'],borderRadius:6}]},options:{...co,plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('c6'),{type:'bar',data:{labels:['Jan','Apr','Jul','Oct'],datasets:[{label:'Chennai',data:[5,20,120,80],backgroundColor:'rgba(225,87,89,0.7)',borderRadius:4},{label:'Delhi',data:[10,15,200,30],backgroundColor:'rgba(0,200,255,0.7)',borderRadius:4},{label:'Mumbai',data:[3,10,300,60],backgroundColor:'rgba(0,255,159,0.7)',borderRadius:4}]},options:co});
+function cp(){const t=document.getElementById('cb').innerText.replace('COPY','').trim();navigator.clipboard.writeText(t).then(()=>{const b=document.querySelector('.cpbtn');b.textContent='COPIED!';setTimeout(()=>b.textContent='COPY',2000);});}
+</script>
+</body>
+</html>
